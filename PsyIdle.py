@@ -221,12 +221,13 @@ def main():
         theta = random.randint(0, 31) / 10
         while(True):
             theta += 0.1
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[0], tolerance=20)):
+            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[0], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 100,
-                                  duration=random.randint(5, 15) / 10)
+                                  duration=random.randint(5, 25) / 10)
                 break
             else:
                 showX = crossX + \
@@ -247,12 +248,13 @@ def main():
         while(True):
 
             theta += 0.1
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[1], tolerance=20)):
+            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[1], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 100,
-                                  duration=random.randint(5, 15) / 10)
+                                  duration=random.randint(5, 25) / 10)
                 break
             else:
                 showX = crossX + \
@@ -272,12 +274,13 @@ def main():
         while(True):
 
             theta += 0.1
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[2], tolerance=20)):
+            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[2], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 100,
-                                  duration=random.randint(5, 15) / 10)
+                                  duration=random.randint(5, 25) / 10)
                 break
             else:
                 showX = crossX + \
@@ -298,12 +301,13 @@ def main():
         while(True):
 
             theta += 0.1
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[3], tolerance=20)):
+            if(pyautogui.pixelMatchesColor(checkX, checkY, colors[3], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 100,
-                                  duration=random.randint(5, 15) / 10)
+                                  duration=random.randint(5, 25) / 10)
                 break
             else:
                 showX = crossX + \
