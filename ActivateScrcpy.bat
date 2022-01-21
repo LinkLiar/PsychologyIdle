@@ -1,0 +1,1 @@
+.\scrcpy-win64-v1.21\scrcpy.exe

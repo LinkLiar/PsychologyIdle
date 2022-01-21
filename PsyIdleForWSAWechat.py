@@ -7,8 +7,8 @@ import win32gui
 import time
 import numpy
 import math
-labelName = "SDL_app"
-titleName = "SM-G9910"
+labelName = "com.tencent.mm"
+titleName = "WeChat"
 
 
 def GetWindowRegion():
@@ -21,7 +21,7 @@ def GetWindowRegion():
         x2 = win32gui.GetWindowRect(handle)[2]
         y2 = win32gui.GetWindowRect(handle)[3]
         print(win32gui.GetWindowRect(handle))
-        print(x1)
+
         if(pyautogui.onScreen((x1, y1)) & pyautogui.onScreen(x2, y2)):
             pyautogui.alert('窗口识别完成，自动点击已部署')
             return win32gui.GetWindowRect(handle)
@@ -30,10 +30,11 @@ def GetWindowRegion():
 
 
 def CheckIsOutOfArea(windowRegion):
-    mouseX = pyautogui.position()[0]
-    mouseY = pyautogui.position()[1]
-    if(mouseX < windowRegion[0] | mouseX > windowRegion[2] | mouseY < windowRegion[1] | mouseY > windowRegion[2]):
-        pyautogui.alert('鼠标移出区域，暂停中...')
+    # mouseX = pyautogui.position()[0]
+    # mouseY = pyautogui.position()[1]
+    # if(mouseX < windowRegion[0] | mouseX > windowRegion[2] | mouseY < windowRegion[1] | mouseY > windowRegion[2]):
+    #     pyautogui.alert('鼠标移出区域，暂停中...')
+    print("Pause")
 
 
 def WaitUntilShow(imagePath, windowRegion, confidence=1, timeoutThreshold=10):
@@ -80,7 +81,7 @@ def Screenshot(windowRegion, savePath="", convertTo="PIL"):
 
 def main():
     imageCrossPath = "cross.png"
-    imageContinuePath = "continue.png"
+    imageContinuePath = "continueFowWSAWechat.png"
     windowRegion = GetWindowRegion()
     X = windowRegion[0]
     Y = windowRegion[1]
@@ -221,13 +222,13 @@ def main():
         theta = random.randint(0, 31) / 10
         while(True):
             theta += 0.1
-            time.sleep(0.02)
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[0], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 200,
-                                  duration=random.randint(5, 25) / 10)
+                                  duration=random.randint(5, 15) / 10)
                 break
             else:
                 showX = crossX + \
@@ -248,13 +249,13 @@ def main():
         while(True):
 
             theta += 0.1
-            time.sleep(0.02)
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[1], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 200,
-                                  duration=random.randint(5, 25) / 10)
+                                  duration=random.randint(5, 15) / 10)
                 break
             else:
                 showX = crossX + \
@@ -274,13 +275,13 @@ def main():
         while(True):
 
             theta += 0.1
-            time.sleep(0.02)
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[2], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 200,
-                                  duration=random.randint(5, 25) / 10)
+                                  duration=random.randint(5, 15) / 10)
                 break
             else:
                 showX = crossX + \
@@ -301,13 +302,13 @@ def main():
         while(True):
 
             theta += 0.1
-            time.sleep(0.02)
+            time.sleep(0.05)
             checkX = int(crossX + colorCircleRadius*math.cos(theta))
             checkY = int(crossY + colorCircleRadius*math.sin(theta))
             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[3], tolerance=30)):
                 pyautogui.moveTo(checkX, checkY)
                 pyautogui.dragRel(0, 200,
-                                  duration=random.randint(5, 25) / 10)
+                                  duration=random.randint(5, 15) / 10)
                 break
             else:
                 showX = crossX + \
