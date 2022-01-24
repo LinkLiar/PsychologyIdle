@@ -96,12 +96,17 @@ def main():
     hasSquareRadius = 0
     pyautogui.moveTo(continueX, continueY)
     pyautogui.click(clicks=2)
+    count=0
     while(windowRegion != None):
         time.sleep(0.5)
         continueLocation = pyautogui.locateCenterOnScreen(imageContinuePath, region=windowRegion, confidence=0.9)
         if(continueLocation!=None):
                 pyautogui.moveTo(continueLocation[0], continueLocation[1])
                 pyautogui.click(clicks=2)
+                count+=1
+                if(count>25):
+                    break
+
         WaitUntilShow(imageCrossPath, windowRegion,
                       confidence=0.9, timeoutThreshold=10)
         CheckIsOutOfArea(windowRegion)
@@ -218,7 +223,7 @@ def main():
 # One
         tic = time.perf_counter()
         pyautogui.moveTo(crossX-squareRadius, crossY-squareRadius)
-        pyautogui.click(clicks=2)
+        pyautogui.click(clicks=1)
         theta = random.randint(0, 31) / 10
         while(True):
             theta += 0.1
@@ -244,7 +249,7 @@ def main():
 # Two
         tic = time.perf_counter()
         pyautogui.moveTo(crossX+squareRadius, crossY-squareRadius)
-        pyautogui.click(clicks=2)
+        pyautogui.click(clicks=1)
         theta = random.randint(0, 31) / 10
         while(True):
 
@@ -270,7 +275,7 @@ def main():
 # Three
         tic = time.perf_counter()
         pyautogui.moveTo(crossX-squareRadius, crossY+squareRadius)
-        pyautogui.click(clicks=2)
+        pyautogui.click(clicks=1)
         theta = random.randint(0, 31) / 10
         while(True):
 
@@ -297,7 +302,7 @@ def main():
 # Four
         tic = time.perf_counter()
         pyautogui.moveTo(crossX+squareRadius, crossY+squareRadius)
-        pyautogui.click(clicks=2)
+        pyautogui.click(clicks=1)
         theta = random.randint(0, 31) / 10
         while(True):
 
