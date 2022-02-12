@@ -11,6 +11,16 @@ import math
 labelName = "SDL_app"
 titleName = "SM-G9910"
 
+def Median(data):
+    data = sorted(data)
+    size = len(data)
+    if size % 2 == 0: # 判断列表长度为偶数
+        median = (data[size//2]+data[size//2-1])/2
+        data[0] = median
+    if size % 2 == 1: # 判断列表长度为奇数
+        median = data[(size-1)//2]
+        data[0] = median
+    return data[0]
 
 def GetWindowRegion():
     handle = win32gui.FindWindow(0, titleName)
@@ -172,9 +182,11 @@ def main():
         hist.append(brBlackCount)
         
         answerPositon = -1
+        median = Median(hist)
+        print(F"median = {median}")
         for number in range(0,4):
             if(number != hist.index(max(hist)) and number !=hist.index(min(hist))):
-                if(max(hist) - hist[number] >  hist[number]-min(hist)):
+                if(max(hist) - median >  median - min(hist)):
                     answerPositon = hist.index(max(hist))
                 else:
                     answerPositon = hist.index(min(hist))
