@@ -1,4 +1,3 @@
-from turtle import color
 import pyautogui
 import cv2
 import random
@@ -21,6 +20,15 @@ def Median(data):
         median = data[(size-1)//2]
         data[0] = median
     return data[0]
+
+def FindMinIndex(set):
+    minIndex = -1
+    min = 999999
+    for i in range(0,len(set)):
+        if(len(set[i]) < min):
+            minIndex = i
+            min = len(set[i])
+    return minIndex
 
 def GetWindowRegion():
     handle = win32gui.FindWindow(0, titleName)
@@ -77,20 +85,9 @@ def Screenshot(windowRegion, savePath="", convertTo="PIL"):
         return imagePIL
 
 
-# topLeftX, topLeftY, bottomRightX, bottomRightY = win32gui.GetWindowRect(328656)
-
-# targetX = 1
-# targetY = 1
-
-# random.randint(5, 40)
-# pyautogui.moveTo(targetX, targetY, duration=random.randint(5, 40)/10)
-# pyautogui.leftClick(x=targetX, y=targetY)
-# pyautogui.PAUSE = 2.5  # second
-# pyautogui.position()  # 当前鼠标的坐标
-
-
 def main():
     imageCrossPath = "cross.png"
+    imagefailPath = "fail.png"
     imageContinuePath = "continue.png"
     windowRegion = GetWindowRegion()
     X = windowRegion[0]
@@ -129,22 +126,34 @@ def main():
 
     while(windowRegion != None):
         CheckIsOutOfArea(windowRegion)
-        time.sleep(0.4)#random.randint(2, 5)/10
+        time.sleep(0.1)
+
+        failLocation = pyautogui.locateCenterOnScreen(imagefailPath, region=windowRegion, confidence=0.9)
+        if(failLocation != None):
+            # break
+            pass
         continueLocation = pyautogui.locateCenterOnScreen(imageContinuePath, region=windowRegion, confidence=0.9)
         if(continueLocation != None):
                 pyautogui.moveTo(continueLocation[0], continueLocation[1])
                 pyautogui.click(clicks=2)
         image = Screenshot(squareRegion,convertTo="OpenCV")
-        gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-        _, imageBinary = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU) 
 
         height = image.shape[0]
         width = image.shape[1]
+      
+        tlArea = image[0:int(height/4),0:int(width/4)]
+        trArea = image[0:int(height/4),int(width/2):int(3*width/4)]
+        blArea = image[int(height/2):int(3*height/4),0:int(width/4)]
+        brArea = image[int(height/2):int(3*height/4),int(width/2):int(3*width/4)]
 
-        tlArea = imageBinary[0:int(height/4),0:int(width/4)]
-        trArea = imageBinary[0:int(height/4),int(width/2):int(3*width/4)]
-        blArea = imageBinary[int(height/2):int(3*height/4),0:int(width/4)]
-        brArea = imageBinary[int(height/2):int(3*height/4),int(width/2):int(3*width/4)]
+        tlgray=cv2.cvtColor(tlArea,cv2.COLOR_BGR2GRAY)
+        _, tlArea = cv2.threshold(tlgray, 0, 255, cv2.THRESH_OTSU)         
+        trgray=cv2.cvtColor(trArea,cv2.COLOR_BGR2GRAY)
+        _, trArea = cv2.threshold(trgray, 0, 255, cv2.THRESH_OTSU)         
+        blgray=cv2.cvtColor(blArea,cv2.COLOR_BGR2GRAY)
+        _, blArea = cv2.threshold(blgray, 0, 255, cv2.THRESH_OTSU) 
+        brgray=cv2.cvtColor(brArea,cv2.COLOR_BGR2GRAY)
+        _, brArea = cv2.threshold(brgray, 0, 255, cv2.THRESH_OTSU) 
 
         tlHist = tlArea.ravel()
         trHist = trArea.ravel()
@@ -175,21 +184,54 @@ def main():
         print("3 = "+str(blBlackCount))
         print("4 = "+str(brBlackCount))
 
-        hist = []
-        hist.append(trBlackCount)
-        hist.append(tlBlackCount)
-        hist.append(blBlackCount)
-        hist.append(brBlackCount)
-        
+        hist = [trBlackCount,tlBlackCount,blBlackCount,brBlackCount]
+    
         answerPositon = -1
         median = Median(hist)
         print(F"median = {median}")
-        for number in range(0,4):
-            if(number != hist.index(max(hist)) and number !=hist.index(min(hist))):
-                if(max(hist) - median >  median - min(hist)):
-                    answerPositon = hist.index(max(hist))
-                else:
-                    answerPositon = hist.index(min(hist))
+        print(max(hist) - min(hist))
+        if(max(hist) - min(hist) > 0.05 * median): #max(hist) - min(hist) > 0.05 * median
+            if(max(hist) - median >  median - min(hist)):
+                answerPositon = hist.index(max(hist))
+            else:
+                answerPositon = hist.index(min(hist))
+        else:
+            print("Checking Again in detail...")
+            print(F"difer = {max(hist) - min(hist)}")
+            cv2.imwrite("tl.png", tlArea) 
+            cv2.imwrite("tr.png", trArea) 
+            cv2.imwrite("bl.png", blArea) 
+            cv2.imwrite("br.png", brArea) 
+
+            tlCntsSet,_ = cv2.findContours(cv2.bitwise_not(tlArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            trCntsSet,_ = cv2.findContours(cv2.bitwise_not(trArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            blCntsSet,_ = cv2.findContours(cv2.bitwise_not(blArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            brCntsSet,_ = cv2.findContours(cv2.bitwise_not(brArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+
+            tlCnts = tlCntsSet[FindMinIndex(tlCntsSet)]
+            trCnts = trCntsSet[FindMinIndex(trCntsSet)]
+            blCnts = blCntsSet[FindMinIndex(blCntsSet)]
+            brCnts = brCntsSet[FindMinIndex(brCntsSet)]
+
+            tlMinRect = cv2.minAreaRect(tlCnts)
+            trMinRect = cv2.minAreaRect(trCnts)
+            blMinRect = cv2.minAreaRect(blCnts)
+            brMinRect = cv2.minAreaRect(brCnts)
+
+            tlMinRectArea = tlMinRect[1][0]*tlMinRect[1][1]
+            trMinRectArea = trMinRect[1][0]*trMinRect[1][1]
+            blMinRectArea = blMinRect[1][0]*blMinRect[1][1]
+            brMinRectArea = brMinRect[1][0]*brMinRect[1][1]
+            proportion = [trBlackCount/trMinRectArea,tlBlackCount/tlMinRectArea,blBlackCount/blMinRectArea,brBlackCount/brMinRectArea]
+            # proportion = [len(trCnts[0]),len(tlCnts[0]),len(blCnts[0]),len(brCnts[0])]
+
+            print(proportion)
+            print(Median(proportion))
+            if(max(proportion) - Median(proportion) >  Median(proportion) - min(proportion)):
+                answerPositon = proportion.index(max(proportion))
+            else:
+                answerPositon = proportion.index(min(proportion))
+
 
         print("Answer In "+ str(answerPositon+1))
 
@@ -207,251 +249,6 @@ def main():
             pyautogui.click(clicks=2)       
 
         CheckIsOutOfArea(windowRegion)
-
-
-
-
-
-
-
-
-
-
-
-
-
-#     bias = 50
-#     colorCircleRadius = 0
-#     squareRadius = 20
-#     continueX, continueY = pyautogui.locateCenterOnScreen(
-#         imageContinuePath, region=windowRegion, confidence=0.9)
-#     hasSquareRadius = 0
-#     pyautogui.moveTo(continueX, continueY)
-#     pyautogui.click(clicks=2)
-#     while(windowRegion != None):
-#         time.sleep(0.5)
-#         continueLocation = pyautogui.locateCenterOnScreen(imageContinuePath, region=windowRegion, confidence=0.9)
-#         if(continueLocation!=None):
-#                 pyautogui.moveTo(continueLocation[0], continueLocation[1])
-#                 pyautogui.click(clicks=2)
-#         WaitUntilShow(imageCrossPath, windowRegion,
-#                       confidence=0.9, timeoutThreshold=10)
-#         CheckIsOutOfArea(windowRegion)
-#         crossX = 0
-#         crossY = 0
-#         while(True):
-#             crossLocation = pyautogui.locateCenterOnScreen(
-#                 imageCrossPath, region=windowRegion, confidence=0.9)
-#             if(crossLocation==None):
-#                 continue
-#             crossX = crossLocation[0]
-#             crossY = crossLocation[1]
-#             pyautogui.moveTo(crossX, crossY+200)
-#             break
-#         print(f"Located cross...in ({crossX} ,{crossY} )")
-#         # crossLocation = pyautogui.locateAllOnScreen(imagePath,region=windowRegion,confidence=0.9)
-#         # crossX ,crossY =pyautogui.center(crossLocation)
-
-#         colors = [(), (), (), ()]
-#         while(True):
-            
-#             if(pyautogui.pixel(int(crossX-squareRadius), int(crossY-squareRadius)) != backgroundColor):
-#                 colors[0] = pyautogui.pixel(
-#                     int(crossX-squareRadius), int(crossY-squareRadius))
-#                 pyautogui.moveTo(crossX-squareRadius,
-#                                  crossY-squareRadius)
-#                 print(f"pyautogui.pixel = {colors[0]}")   
-#             else:
-#                 if(not hasSquareRadius):
-#                     squareRadius += 1
-#             if(pyautogui.pixel(int(crossX+squareRadius), int(crossY-squareRadius)) != backgroundColor):
-#                 colors[1] = pyautogui.pixel(
-#                     int(crossX+squareRadius), int(crossY-squareRadius))
-#                 pyautogui.moveTo(crossX+squareRadius,
-#                                  crossY-squareRadius)
-#                 print(f"pyautogui.pixel = {colors[1]}")
-#             else:
-#                 if(not hasSquareRadius):
-#                     squareRadius += 1
-#             if(pyautogui.pixel(int(crossX-squareRadius), int(crossY+squareRadius)) != backgroundColor):
-#                 colors[2] = pyautogui.pixel(
-#                     int(crossX-squareRadius), int(crossY+squareRadius))
-#                 pyautogui.moveTo(crossX-squareRadius,
-#                                  crossY+squareRadius)
-#                 print(f"pyautogui.pixel = {colors[2]}")           
-#             else:
-#                 if(not hasSquareRadius):
-#                     squareRadius += 1
-#             if(pyautogui.pixel(int(crossX+squareRadius), int(crossY+squareRadius)) != backgroundColor):
-#                 colors[3] = pyautogui.pixel(
-#                     int(crossX+squareRadius), int(crossY+squareRadius))
-#                 pyautogui.moveTo(crossX+squareRadius,
-#                                  crossY+squareRadius)
-#                 print(f"pyautogui.pixel = {colors[3]}")              
-#             else:
-#                 if(not hasSquareRadius):
-#                     squareRadius += 1
-#             if((colors[0] != backgroundColor)and (colors[0] != ()) and (colors[1] != backgroundColor) and(colors[1] != ()) and (colors[2] != backgroundColor) and(colors[2] != ()) and (colors[3] != backgroundColor)and (colors[3] != ()) ):
-#                 print("Colors All Have Shown...")
-#                 print(f"squareRadius = {squareRadius}")
-#                 hasSquareRadius = True
-#                 break
-
-#         while(True):
-#             c0 = pyautogui.pixel(int(crossX-squareRadius),
-#                                  int(crossY-squareRadius))
-#             c1 = pyautogui.pixel(int(crossX+squareRadius),
-#                                  int(crossY-squareRadius))
-#             c2 = pyautogui.pixel(int(crossX-squareRadius),
-#                                  int(crossY+squareRadius))
-#             c3 = pyautogui.pixel(int(crossX+squareRadius),
-#                                  int(crossY+squareRadius))
-#             if((colors[0] != backgroundColor) and (colors[1] != backgroundColor) and (colors[2] != backgroundColor) and (colors[3] != backgroundColor)):
-#                 print(f"Searching WHITE...")
-#                 while(True):
-#                     c0 = pyautogui.pixel(int(crossX-squareRadius),
-#                                          int(crossY-squareRadius))
-#                     c1 = pyautogui.pixel(int(crossX+squareRadius),
-#                                          int(crossY-squareRadius))
-#                     c2 = pyautogui.pixel(int(crossX-squareRadius),
-#                                          int(crossY+squareRadius))
-#                     c3 = pyautogui.pixel(int(crossX+squareRadius),
-#                                          int(crossY+squareRadius))
-#                     # print(c0,c1,c2,c3)
-#                     if((c0 == WHITE) and (c1 == WHITE) and (c2 == WHITE) and (c3 == WHITE)):
-#                         print("Starting Find Colors in ColorCircle...")
-#                         break
-#                 break
-
-#         if(colorCircleRadius == 0):
-#             colorCircleRadius = squareRadius
-#             startX = 0
-#             endX = 0
-#             pyautogui.moveTo(crossX-squareRadius, crossY-squareRadius)
-#             pyautogui.click(clicks=2)
-#             while(True):
-#                 if(pyautogui.pixel(int(crossX-colorCircleRadius), int(crossY)) == backgroundColor):
-#                     colorCircleRadius += 1
-#                     # print(pyautogui.pixel(int(crossX-colorCircleRadius), int(crossY)))
-#                 else:
-#                     startX = colorCircleRadius
-#                     while(True):
-#                         # print(pyautogui.pixel(int(crossX-colorCircleRadius), int(crossY)))
-#                         if(pyautogui.pixel(int(crossX-colorCircleRadius), int(crossY)) != backgroundColor):
-#                             colorCircleRadius += 1
-#                         else:
-#                             endX = colorCircleRadius
-#                             break
-#                     break
-#             colorCircleRadius = int((startX+endX)/2)
-#             print(f"colorCircleRadius = {colorCircleRadius}")
-
-# # ===================================================================================
-# # One
-#         tic = time.perf_counter()
-#         pyautogui.moveTo(crossX-squareRadius, crossY-squareRadius)
-#         pyautogui.click(clicks=2)
-#         theta = random.randint(0, 31) / 10
-#         while(True):
-#             theta += 0.1
-#             time.sleep(0.02)
-#             checkX = int(crossX + colorCircleRadius*math.cos(theta))
-#             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-#             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[0], tolerance=30)):
-#                 pyautogui.moveTo(checkX, checkY)
-#                 pyautogui.dragRel(0, 200,
-#                                   duration=random.randint(5, 25) / 10)
-#                 break
-#             else:
-#                 showX = crossX + \
-#                     (squareRadius)*math.cos(theta)
-#                 showY = crossY + \
-#                     (squareRadius)*math.cos(theta)
-#                 # pyautogui.moveTo(showX, showY)
-#         toc = time.perf_counter()
-#         timeComsume = toc-tic
-#         print(f"Stage One for {timeComsume} second")
-
-# # ===================================================================================
-# # Two
-#         tic = time.perf_counter()
-#         pyautogui.moveTo(crossX+squareRadius, crossY-squareRadius)
-#         pyautogui.click(clicks=2)
-#         theta = random.randint(0, 31) / 10
-#         while(True):
-
-#             theta += 0.1
-#             time.sleep(0.02)
-#             checkX = int(crossX + colorCircleRadius*math.cos(theta))
-#             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-#             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[1], tolerance=30)):
-#                 pyautogui.moveTo(checkX, checkY)
-#                 pyautogui.dragRel(0, 200,
-#                                   duration=random.randint(5, 25) / 10)
-#                 break
-#             else:
-#                 showX = crossX + \
-#                     (squareRadius)*math.cos(theta)
-#                 showY = crossY + \
-#                     (squareRadius)*math.cos(theta)
-#                 # pyautogui.moveTo(showX, showY)
-#         toc = time.perf_counter()
-#         timeComsume = toc-tic
-#         print(f"Stage Two for {timeComsume} second")
-# # ===================================================================================
-# # Three
-#         tic = time.perf_counter()
-#         pyautogui.moveTo(crossX-squareRadius, crossY+squareRadius)
-#         pyautogui.click(clicks=2)
-#         theta = random.randint(0, 31) / 10
-#         while(True):
-
-#             theta += 0.1
-#             time.sleep(0.02)
-#             checkX = int(crossX + colorCircleRadius*math.cos(theta))
-#             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-#             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[2], tolerance=30)):
-#                 pyautogui.moveTo(checkX, checkY)
-#                 pyautogui.dragRel(0, 200,
-#                                   duration=random.randint(5, 25) / 10)
-#                 break
-#             else:
-#                 showX = crossX + \
-#                     (squareRadius)*math.cos(theta)
-#                 showY = crossY + \
-#                     (squareRadius)*math.cos(theta)
-#                 # pyautogui.moveTo(showX, showY)
-#         toc = time.perf_counter()
-#         timeComsume = toc-tic
-#         print(f"Stage Three for {timeComsume} second")
-
-# # ===================================================================================
-# # Four
-#         tic = time.perf_counter()
-#         pyautogui.moveTo(crossX+squareRadius, crossY+squareRadius)
-#         pyautogui.click(clicks=2)
-#         theta = random.randint(0, 31) / 10
-#         while(True):
-
-#             theta += 0.1
-#             time.sleep(0.02)
-#             checkX = int(crossX + colorCircleRadius*math.cos(theta))
-#             checkY = int(crossY + colorCircleRadius*math.sin(theta))
-#             if(pyautogui.pixelMatchesColor(checkX, checkY, colors[3], tolerance=30)):
-#                 pyautogui.moveTo(checkX, checkY)
-#                 pyautogui.dragRel(0, 200,
-#                                   duration=random.randint(5, 25) / 10)
-#                 break
-#             else:
-#                 showX = crossX + \
-#                     (squareRadius)*math.cos(theta)
-#                 showY = crossY + \
-#                     (squareRadius)*math.cos(theta)
-#                 # pyautogui.moveTo(showX, showY)
-#         toc = time.perf_counter()
-#         timeComsume = toc-tic
-#         print(f"Stage Four for {timeComsume} second")
-
 
 if __name__ == '__main__':
     main()
