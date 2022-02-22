@@ -7,8 +7,8 @@ import win32gui
 import time
 import numpy
 import math
-labelName = "SDL_app"
-titleName = "SM-G9910"
+labelName = "com.tencent.mm"
+titleName = "WeChat"
 
 def Median(data):
     data = sorted(data)
@@ -70,11 +70,12 @@ def WaitUntilShow(imagePath, windowRegion, confidence=1, timeoutThreshold=10):
         print(f"Wait {imagePath} for {timeComsume} second")
 
 
-def Screenshot(windowRegion, savePath="", convertTo="OpenCV"):
+def Screenshot(windowRegion, savePath="", convertTo="PIL"):
     if(windowRegion[0] == 0 & windowRegion[1] == 0 & windowRegion[2] == 0 & windowRegion[3] == 0):
         imagePIL = pyautogui.screenshot()
     else:
-        imagePIL = pyautogui.screenshot(region=(windowRegion[0], windowRegion[1], windowRegion[2]-windowRegion[0], windowRegion[3]-windowRegion[1]))
+        imagePIL = pyautogui.screenshot(region=(
+            windowRegion[0], windowRegion[1], windowRegion[2]-windowRegion[0], windowRegion[3]-windowRegion[1]))
     if(savePath != ""):
         imagePIL.save(savePath)
     if(convertTo == "OpenCV"):
@@ -87,7 +88,7 @@ def Screenshot(windowRegion, savePath="", convertTo="OpenCV"):
 def main():
     imageCrossPath = "cross.png"
     imagefailPath = "fail.png"
-    imageContinuePath = "continue.png"
+    imageContinuePath = "continueForWSA.png"
     windowRegion = GetWindowRegion()
     X = windowRegion[0]
     Y = windowRegion[1]
@@ -96,7 +97,7 @@ def main():
     WHITE = (255, 255, 255)
 
     continueX, continueY = pyautogui.locateCenterOnScreen(
-        imageContinuePath, region=windowRegion, confidence=0.9)
+        imageContinuePath, region=windowRegion, confidence=0.5)
     pyautogui.moveTo(continueX, continueY)
     pyautogui.click(clicks=2)
     image = Screenshot(windowRegion,convertTo="OpenCV")
