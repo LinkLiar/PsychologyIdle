@@ -66,18 +66,6 @@ def Screenshot(windowRegion, savePath="", convertTo="PIL"):
         return imagePIL
 
 
-# topLeftX, topLeftY, bottomRightX, bottomRightY = win32gui.GetWindowRect(328656)
-
-# targetX = 1
-# targetY = 1
-
-# random.randint(5, 40)
-# pyautogui.moveTo(targetX, targetY, duration=random.randint(5, 40)/10)
-# pyautogui.leftClick(x=targetX, y=targetY)
-# pyautogui.PAUSE = 2.5  # second
-# pyautogui.position()  # 当前鼠标的坐标
-
-
 def main():
     imageCrossPath = "cross.png"
     imageContinuePath = "continue.png"
@@ -97,10 +85,11 @@ def main():
     pyautogui.click(clicks=2)
     while(windowRegion != None):
         time.sleep(0.5)
-        continueLocation = pyautogui.locateCenterOnScreen(imageContinuePath, region=windowRegion, confidence=0.9)
-        if(continueLocation!=None):
-                pyautogui.moveTo(continueLocation[0], continueLocation[1])
-                pyautogui.click(clicks=2)
+        continueLocation = pyautogui.locateCenterOnScreen(
+            imageContinuePath, region=windowRegion, confidence=0.9)
+        if(continueLocation != None):
+            pyautogui.moveTo(continueLocation[0], continueLocation[1])
+            pyautogui.click(clicks=2)
         WaitUntilShow(imageCrossPath, windowRegion,
                       confidence=0.9, timeoutThreshold=10)
         CheckIsOutOfArea(windowRegion)
@@ -109,25 +98,23 @@ def main():
         while(True):
             crossLocation = pyautogui.locateCenterOnScreen(
                 imageCrossPath, region=windowRegion, confidence=0.9)
-            if(crossLocation==None):
+            if(crossLocation == None):
                 continue
             crossX = crossLocation[0]
             crossY = crossLocation[1]
             pyautogui.moveTo(crossX, crossY+200)
             break
         print(f"Located cross...in ({crossX} ,{crossY} )")
-        # crossLocation = pyautogui.locateAllOnScreen(imagePath,region=windowRegion,confidence=0.9)
-        # crossX ,crossY =pyautogui.center(crossLocation)
 
         colors = [(), (), (), ()]
         while(True):
-            
+
             if(pyautogui.pixel(int(crossX-squareRadius), int(crossY-squareRadius)) != backgroundColor):
                 colors[0] = pyautogui.pixel(
                     int(crossX-squareRadius), int(crossY-squareRadius))
                 pyautogui.moveTo(crossX-squareRadius,
                                  crossY-squareRadius)
-                print(f"pyautogui.pixel = {colors[0]}")   
+                print(f"pyautogui.pixel = {colors[0]}")
             else:
                 if(not hasSquareRadius):
                     squareRadius += 1
@@ -145,7 +132,7 @@ def main():
                     int(crossX-squareRadius), int(crossY+squareRadius))
                 pyautogui.moveTo(crossX-squareRadius,
                                  crossY+squareRadius)
-                print(f"pyautogui.pixel = {colors[2]}")           
+                print(f"pyautogui.pixel = {colors[2]}")
             else:
                 if(not hasSquareRadius):
                     squareRadius += 1
@@ -154,11 +141,11 @@ def main():
                     int(crossX+squareRadius), int(crossY+squareRadius))
                 pyautogui.moveTo(crossX+squareRadius,
                                  crossY+squareRadius)
-                print(f"pyautogui.pixel = {colors[3]}")              
+                print(f"pyautogui.pixel = {colors[3]}")
             else:
                 if(not hasSquareRadius):
                     squareRadius += 1
-            if((colors[0] != backgroundColor)and (colors[0] != ()) and (colors[1] != backgroundColor) and(colors[1] != ()) and (colors[2] != backgroundColor) and(colors[2] != ()) and (colors[3] != backgroundColor)and (colors[3] != ()) ):
+            if((colors[0] != backgroundColor) and (colors[0] != ()) and (colors[1] != backgroundColor) and (colors[1] != ()) and (colors[2] != backgroundColor) and (colors[2] != ()) and (colors[3] != backgroundColor) and (colors[3] != ())):
                 print("Colors All Have Shown...")
                 print(f"squareRadius = {squareRadius}")
                 hasSquareRadius = True

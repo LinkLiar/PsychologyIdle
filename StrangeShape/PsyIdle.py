@@ -10,25 +10,28 @@ import math
 labelName = "SDL_app"
 titleName = "SM-G9910"
 
+
 def Median(data):
     data = sorted(data)
     size = len(data)
-    if size % 2 == 0: # 判断列表长度为偶数
+    if size % 2 == 0:  # 判断列表长度为偶数
         median = (data[size//2]+data[size//2-1])/2
         data[0] = median
-    if size % 2 == 1: # 判断列表长度为奇数
+    if size % 2 == 1:  # 判断列表长度为奇数
         median = data[(size-1)//2]
         data[0] = median
     return data[0]
 
+
 def FindMinIndex(set):
     minIndex = -1
     min = 999999
-    for i in range(0,len(set)):
+    for i in range(0, len(set)):
         if(len(set[i]) < min):
             minIndex = i
             min = len(set[i])
     return minIndex
+
 
 def GetWindowRegion():
     handle = win32gui.FindWindow(0, titleName)
@@ -74,7 +77,8 @@ def Screenshot(windowRegion, savePath="", convertTo="OpenCV"):
     if(windowRegion[0] == 0 & windowRegion[1] == 0 & windowRegion[2] == 0 & windowRegion[3] == 0):
         imagePIL = pyautogui.screenshot()
     else:
-        imagePIL = pyautogui.screenshot(region=(windowRegion[0], windowRegion[1], windowRegion[2]-windowRegion[0], windowRegion[3]-windowRegion[1]))
+        imagePIL = pyautogui.screenshot(region=(
+            windowRegion[0], windowRegion[1], windowRegion[2]-windowRegion[0], windowRegion[3]-windowRegion[1]))
     if(savePath != ""):
         imagePIL.save(savePath)
     if(convertTo == "OpenCV"):
@@ -99,60 +103,64 @@ def main():
         imageContinuePath, region=windowRegion, confidence=0.9)
     pyautogui.moveTo(continueX, continueY)
     pyautogui.click(clicks=2)
-    image = Screenshot(windowRegion,convertTo="OpenCV")
+    image = Screenshot(windowRegion, convertTo="OpenCV")
     height = image.shape[0]
     width = image.shape[1]
     startHeight = 0
     endHeight = 0
 
-    for position in range(100,height):
-        color= image[position,int(width/2)]
+    for position in range(100, height):
+        color = image[position, int(width/2)]
         if((color == WHITE).all() and startHeight == 0):
             startHeight = position
-        if((color != WHITE).any() and startHeight !=0 and endHeight == 0):
+        if((color != WHITE).any() and startHeight != 0 and endHeight == 0):
             endHeight = position
 
     startWidth = 0
     endWidth = 0
-    for position in range(10,width):
-        color = image[int(height/2),position]
+    for position in range(10, width):
+        color = image[int(height/2), position]
         if((color == WHITE).all() and startWidth == 0):
             startWidth = position
-        if((color != WHITE).any() and startWidth !=0 and endWidth == 0):
+        if((color != WHITE).any() and startWidth != 0 and endWidth == 0):
             endWidth = position
 
-    squareRegion = (windowRegion[0]+startWidth,windowRegion[1] + startHeight,windowRegion[2]-width+endWidth,windowRegion[3] - height + endHeight)
+    squareRegion = (windowRegion[0]+startWidth, windowRegion[1] + startHeight,
+                    windowRegion[2]-width+endWidth, windowRegion[3] - height + endHeight)
 
     while(windowRegion != None):
         CheckIsOutOfArea(windowRegion)
         time.sleep(0.1)
 
-        failLocation = pyautogui.locateCenterOnScreen(imagefailPath, region=windowRegion, confidence=0.9)
+        failLocation = pyautogui.locateCenterOnScreen(
+            imagefailPath, region=windowRegion, confidence=0.9)
         if(failLocation != None):
             # break
             pass
-        continueLocation = pyautogui.locateCenterOnScreen(imageContinuePath, region=windowRegion, confidence=0.9)
+        continueLocation = pyautogui.locateCenterOnScreen(
+            imageContinuePath, region=windowRegion, confidence=0.9)
         if(continueLocation != None):
-                pyautogui.moveTo(continueLocation[0], continueLocation[1])
-                pyautogui.click(clicks=2)
-        image = Screenshot(squareRegion,convertTo="OpenCV")
+            pyautogui.moveTo(continueLocation[0], continueLocation[1])
+            pyautogui.click(clicks=2)
+        image = Screenshot(squareRegion, convertTo="OpenCV")
 
         height = image.shape[0]
         width = image.shape[1]
-      
-        tlArea = image[0:int(height/4),0:int(width/4)]
-        trArea = image[0:int(height/4),int(width/2):int(3*width/4)]
-        blArea = image[int(height/2):int(3*height/4),0:int(width/4)]
-        brArea = image[int(height/2):int(3*height/4),int(width/2):int(3*width/4)]
 
-        tlgray=cv2.cvtColor(tlArea,cv2.COLOR_BGR2GRAY)
-        _, tlArea = cv2.threshold(tlgray, 0, 255, cv2.THRESH_OTSU)         
-        trgray=cv2.cvtColor(trArea,cv2.COLOR_BGR2GRAY)
-        _, trArea = cv2.threshold(trgray, 0, 255, cv2.THRESH_OTSU)         
-        blgray=cv2.cvtColor(blArea,cv2.COLOR_BGR2GRAY)
-        _, blArea = cv2.threshold(blgray, 0, 255, cv2.THRESH_OTSU) 
-        brgray=cv2.cvtColor(brArea,cv2.COLOR_BGR2GRAY)
-        _, brArea = cv2.threshold(brgray, 0, 255, cv2.THRESH_OTSU) 
+        tlArea = image[0:int(height/4), 0:int(width/4)]
+        trArea = image[0:int(height/4), int(width/2):int(3*width/4)]
+        blArea = image[int(height/2):int(3*height/4), 0:int(width/4)]
+        brArea = image[int(height/2):int(3*height/4),
+                       int(width/2):int(3*width/4)]
+
+        tlgray = cv2.cvtColor(tlArea, cv2.COLOR_BGR2GRAY)
+        _, tlArea = cv2.threshold(tlgray, 0, 255, cv2.THRESH_OTSU)
+        trgray = cv2.cvtColor(trArea, cv2.COLOR_BGR2GRAY)
+        _, trArea = cv2.threshold(trgray, 0, 255, cv2.THRESH_OTSU)
+        blgray = cv2.cvtColor(blArea, cv2.COLOR_BGR2GRAY)
+        _, blArea = cv2.threshold(blgray, 0, 255, cv2.THRESH_OTSU)
+        brgray = cv2.cvtColor(brArea, cv2.COLOR_BGR2GRAY)
+        _, brArea = cv2.threshold(brgray, 0, 255, cv2.THRESH_OTSU)
 
         tlHist = tlArea.ravel()
         trHist = trArea.ravel()
@@ -165,16 +173,16 @@ def main():
         brBlackCount = 0
         for i in tlHist:
             if(i == 0):
-                tlBlackCount+=1    # 第二象限
+                tlBlackCount += 1    # 第二象限
         for i in trHist:
             if(i == 0):
-                trBlackCount+=1    # 第一象限
+                trBlackCount += 1    # 第一象限
         for i in blHist:
             if(i == 0):
-                blBlackCount+=1    # 第三象限
+                blBlackCount += 1    # 第三象限
         for i in brHist:
             if(i == 0):
-                brBlackCount+=1    # 第四象限
+                brBlackCount += 1    # 第四象限
 
         if(tlBlackCount < 100):
             continue
@@ -183,29 +191,33 @@ def main():
         print("3 = "+str(blBlackCount))
         print("4 = "+str(brBlackCount))
 
-        hist = [trBlackCount,tlBlackCount,blBlackCount,brBlackCount]
-    
+        hist = [trBlackCount, tlBlackCount, blBlackCount, brBlackCount]
+
         answerPositon = -1
         median = Median(hist)
         print(F"median = {median}")
         print(max(hist) - min(hist))
-        if(max(hist) - min(hist) > 0.05 * median): #max(hist) - min(hist) > 0.05 * median
-            if(max(hist) - median >  median - min(hist)):
+        if(max(hist) - min(hist) > 0.02 * median):
+            if(max(hist) - median > median - min(hist)):
                 answerPositon = hist.index(max(hist))
             else:
                 answerPositon = hist.index(min(hist))
         else:
             print("Checking Again in detail...")
             print(F"difer = {max(hist) - min(hist)}")
-            cv2.imwrite("tl.png", tlArea) 
-            cv2.imwrite("tr.png", trArea) 
-            cv2.imwrite("bl.png", blArea) 
-            cv2.imwrite("br.png", brArea) 
+            cv2.imwrite("tl.png", tlArea)
+            cv2.imwrite("tr.png", trArea)
+            cv2.imwrite("bl.png", blArea)
+            cv2.imwrite("br.png", brArea)
 
-            tlCntsSet,_ = cv2.findContours(cv2.bitwise_not(tlArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
-            trCntsSet,_ = cv2.findContours(cv2.bitwise_not(trArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
-            blCntsSet,_ = cv2.findContours(cv2.bitwise_not(blArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
-            brCntsSet,_ = cv2.findContours(cv2.bitwise_not(brArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            tlCntsSet, _ = cv2.findContours(cv2.bitwise_not(
+                tlArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            trCntsSet, _ = cv2.findContours(cv2.bitwise_not(
+                trArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            blCntsSet, _ = cv2.findContours(cv2.bitwise_not(
+                blArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
+            brCntsSet, _ = cv2.findContours(cv2.bitwise_not(
+                brArea), cv2.RETR_EXTERNAL, cv2.RETR_LIST)
 
             tlCnts = tlCntsSet[FindMinIndex(tlCntsSet)]
             trCnts = trCntsSet[FindMinIndex(trCntsSet)]
@@ -221,33 +233,38 @@ def main():
             trMinRectArea = trMinRect[1][0]*trMinRect[1][1]
             blMinRectArea = blMinRect[1][0]*blMinRect[1][1]
             brMinRectArea = brMinRect[1][0]*brMinRect[1][1]
-            proportion = [trBlackCount/trMinRectArea,tlBlackCount/tlMinRectArea,blBlackCount/blMinRectArea,brBlackCount/brMinRectArea]
+            proportion = [trBlackCount/trMinRectArea, tlBlackCount/tlMinRectArea,
+                          blBlackCount/blMinRectArea, brBlackCount/brMinRectArea]
             # proportion = [len(trCnts[0]),len(tlCnts[0]),len(blCnts[0]),len(brCnts[0])]
 
             print(proportion)
             print(Median(proportion))
-            if(max(proportion) - Median(proportion) >  Median(proportion) - min(proportion)):
+            if(max(proportion) - Median(proportion) > Median(proportion) - min(proportion)):
                 answerPositon = proportion.index(max(proportion))
             else:
                 answerPositon = proportion.index(min(proportion))
 
-
-        print("Answer In "+ str(answerPositon+1))
+        print("Answer In " + str(answerPositon+1))
 
         if(answerPositon == 0):
-            pyautogui.moveTo(windowRegion[0] + startWidth + int(3*width/4), windowRegion[1]+startHeight + int(height/4))
+            pyautogui.moveTo(
+                windowRegion[0] + startWidth + int(3*width/4), windowRegion[1]+startHeight + int(height/4))
             pyautogui.click(clicks=2)
         if(answerPositon == 1):
-            pyautogui.moveTo(windowRegion[0] + startWidth + int(width/4), windowRegion[1]+startHeight + int(height/4))
+            pyautogui.moveTo(
+                windowRegion[0] + startWidth + int(width/4), windowRegion[1]+startHeight + int(height/4))
             pyautogui.click(clicks=2)
         if(answerPositon == 2):
-            pyautogui.moveTo(windowRegion[0] + startWidth + int(width/4), windowRegion[1]+startHeight + int(3*height/4))
+            pyautogui.moveTo(windowRegion[0] + startWidth + int(width/4),
+                             windowRegion[1]+startHeight + int(3*height/4))
             pyautogui.click(clicks=2)
         if(answerPositon == 3):
-            pyautogui.moveTo(windowRegion[0] + startWidth + int(3*width/4), windowRegion[1]+startHeight + int(3*height/4))
-            pyautogui.click(clicks=2)       
+            pyautogui.moveTo(windowRegion[0] + startWidth + int(3*width/4),
+                             windowRegion[1]+startHeight + int(3*height/4))
+            pyautogui.click(clicks=2)
 
         CheckIsOutOfArea(windowRegion)
+
 
 if __name__ == '__main__':
     main()
